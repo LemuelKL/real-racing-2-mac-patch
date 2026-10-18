@@ -1,0 +1,5 @@
+build/
+notes/
+*.dylib
+.DS_Store
+__pycache__/
