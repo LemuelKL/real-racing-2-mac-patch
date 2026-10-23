@@ -44,8 +44,19 @@ To uninstall:
 4. **Window flushing left off.** The game turns flushing off for its intro movie and only turns it back on if the movie loads. QTKit can't load it any more.
 5. **Sound stuck on one device.** FMOD, the game's audio library, binds to whatever output was the default at launch. It now follows the system output, so switching to AirPods works.
 6. **Crash with no default input device.** A bug in FMOD's device listing reads a NULL name when macOS reports no default microphone.
+7. **Phone tilt steering.** The game's phone controller page steers with motion sensors, which phone browsers now only allow on HTTPS pages. rr2fix serves the page over HTTPS and adapts it for current browsers.
 
 [docs/how-it-works.md](docs/how-it-works.md) explains how each problem was tracked down and how the hook works.
+
+## Phone controller
+
+The game can use your phone as a steering wheel. Open the address the game shows (for example `http://192.168.1.20:2011`) on your phone, then tap **Open controller**. This goes to `https://<your Mac>:2012`.
+
+The browser warns that the connection isn't private, because the certificate was made by rr2fix on your Mac. Continue anyway (Safari: Show Details, then visit this website. Chrome: Advanced, then Proceed). On iPhone, tap the page once to allow motion access.
+
+If the iPhone page loads but never connects, install the certificate linked on the landing page. Then turn it on in Settings > General > About > Certificate Trust Settings. It is limited to private network addresses. The certificate files are in `~/Library/Application Support/rr2fix`.
+
+If steering is reversed, add `?flip` to the end of the controller address.
 
 ## Troubleshooting
 
@@ -74,6 +85,7 @@ Known quirks:
 ```
 install.sh            build, install, uninstall
 src/rr2fix.m          the fixes, one section per problem
+src/remote/           the phone controller's landing page and the script added to it
 docs/how-it-works.md  the investigation
 ```
 

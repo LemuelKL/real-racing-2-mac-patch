@@ -127,6 +127,21 @@ I reproduced it with a small test program that loads FMOD and lists the recordin
 
 Jackson's patcher edits the instruction instead, so it checks the right count and adds the device straight away. Same result.
 
+## 7. Phone tilt steering
+
+The game has a phone controller. Its menu says to open `http://<Mac>:2011` on a phone. The game itself serves that page (`RR2Controller/` inside `res.bin`) and talks to it over a WebSocket. Touches and the pause button worked. Steering didn't.
+
+The page steers with `devicemotion` events, which it forwards as `MOTN x y z` messages. The game passes those straight into `CGlobal::scene_AccelerometerUpdated`, the same path the iPhone version used for its own accelerometer. Today's phone browsers only send motion events to secure (HTTPS) pages. iOS also wants a permission prompt from a tap. On a plain HTTP page the events never arrive, so the game never hears from the sensor.
+
+**Fix:** serve the page over HTTPS without touching the game's server.
+
+- rr2fix interposes `bind`. When the game binds port 2011 on all interfaces, it binds `127.0.0.1:2011` instead. rr2fix listens on the network side of 2011 itself. A more specific address wins, so local connections still reach the game and phone connections reach rr2fix.
+- Plain HTTP on 2011 shows a landing page that links to HTTPS on port 2012. Port 2012 relays every request and WebSocket to the game. It also inserts `remote.js` at the top of the controller page.
+- `remote.js` changes the page's `ws://` URL to `wss://` and asks iOS for motion permission. On non-iOS browsers it flips the gravity signs, because they report the opposite sign to iOS, and iOS is what the game expects. It also fills in `window.orientation` where it's missing, because the game uses it to choose the steering axis.
+- The certificate comes from a local CA that rr2fix creates with `/usr/bin/openssl` in `~/Library/Application Support/rr2fix`. A new server certificate is made whenever the Mac's addresses change. The CA has name constraints for private IP ranges, so even if you trust it on your phone, it can't vouch for any other site.
+
+The game's files are still unchanged. The script is inserted as the page is relayed.
+
 ## Odds and ends
 
 - **A white screen with working audio is a useful clue.** It means the game is running and its frames are going nowhere, which is a different problem from a freeze. Here both happened, one after the other.

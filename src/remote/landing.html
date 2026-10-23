@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real Racing 2 Controller</title>
+<style>
+    body { margin: 0; padding: 24px; background: #111; color: #eee; font: 16px/1.45 -apple-system, Helvetica, sans-serif; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    a { color: #6cf; }
+    .go { display: block; margin: 20px 0; padding: 16px; border-radius: 10px; background: #2a7de1; color: #fff;
+          text-align: center; text-decoration: none; font-weight: bold; font-size: 20px; }
+    .small { color: #aaa; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>Real Racing 2 Controller</h1>
+<p>Phone browsers only allow tilt steering on secure pages, so the controller opens over HTTPS.</p>
+<a class="go" id="go" href="#">Open controller</a>
+<p>Your browser will warn that the connection isn't private. The certificate was made by rr2fix on your Mac.</p>
+<ul>
+    <li>Safari: Show Details, then visit this website.</li>
+    <li>Chrome: Advanced, then Proceed.</li>
+</ul>
+<p class="small">If the controller loads but stays disconnected (some iPhones refuse WebSockets with an
+unverified certificate), install <a href="/rr2fix/rr2fix-ca.cer">the rr2fix certificate</a>, then turn it
+on in Settings &gt; General &gt; About &gt; Certificate Trust Settings. It can only vouch for local network
+addresses.</p>
+<script>
+    document.getElementById('go').href = 'https://' + location.hostname + ':2012/RR2Controller/index.html';
+</script>
+</body>
+</html>

@@ -32,10 +32,12 @@ VERSION="$(defaults read "$APP/Contents/Info" CFBundleShortVersionString 2>/dev/
 [ "$VERSION" = "1.1.2" ] || echo "Warning: tested with version 1.1.2, this app is $VERSION. Trying anyway."
 
 mkdir -p "$BUILD"
-CFLAGS="-arch x86_64 -mmacosx-version-min=10.13 -dynamiclib -fobjc-arc -O2 -Wno-deprecated-declarations"
+CFLAGS="-arch x86_64 -mmacosx-version-min=10.15 -dynamiclib -fobjc-arc -O2 -Wno-deprecated-declarations"
+# The phone controller's script and landing page are built into the library.
+EMBED="-Wl,-sectcreate,__TEXT,__remote_js,$HERE/src/remote/remote.js -Wl,-sectcreate,__TEXT,__remote_html,$HERE/src/remote/landing.html"
 echo "Building rr2fix.dylib..."
-clang $CFLAGS -framework Cocoa -framework OpenGL -framework AudioToolbox -framework CoreAudio \
-    -o "$BUILD/rr2fix.dylib" "$HERE/src/rr2fix.m"
+clang $CFLAGS $EMBED -framework Cocoa -framework OpenGL -framework AudioToolbox -framework CoreAudio \
+    -framework Network -framework Security -o "$BUILD/rr2fix.dylib" "$HERE/src/rr2fix.m"
 
 # Move the real executable aside once. Re-running only refreshes the dylib.
 if [ ! -f "$ORIG" ]; then
@@ -43,7 +45,9 @@ if [ ! -f "$ORIG" ]; then
     mv "$EXE" "$ORIG"
 fi
 
-cp "$BUILD/rr2fix.dylib" "$FRAMEWORKS/"
+# Replace rather than overwrite, so a running game keeps the copy it has mapped.
+cp "$BUILD/rr2fix.dylib" "$FRAMEWORKS/rr2fix.dylib.new"
+mv -f "$FRAMEWORKS/rr2fix.dylib.new" "$FRAMEWORKS/rr2fix.dylib"
 
 cat > "$EXE" <<'EOF'
 #!/bin/sh
